@@ -18,6 +18,8 @@ func main() {
 	timeout := flag.Int64("t", 30, "The timeout duration in seconds.")
 	portList := flag.String("p", "", "A comma seperated list containing the ports to scan.\n\tE.G. usage :  80,443,3389,1433.")
 	portRange := flag.String("pr", "", "A port range as 'port'-'port'.\n\tE.G. usage : 80-443 would scan all ports from 80 through 443")
+	workers := flag.Int("w", 3, "A port range as 'port'-'port'.\n\tE.G. usage : 80-443 would scan all ports from 80 through 443")
+
 	flag.Parse()
 
 	duration := time.Duration(*timeout) * time.Second
@@ -26,7 +28,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	connectionBroker(duration, *host, ports)
+	if *workers == 0 {
+		*workers = 1
+	}
+	connectionBroker(duration, *workers, *host, ports)
 
 }
 
@@ -72,7 +77,7 @@ func getPorts(portList, portRange string) ([]int, error) {
 
 }
 
-func connectionBroker(duration time.Duration, host string, ports []int) {
+func connectionBroker(duration time.Duration, workers int, host string, ports []int) {
 
 	work := make(chan string)
 	go func() {
@@ -83,9 +88,9 @@ func connectionBroker(duration time.Duration, host string, ports []int) {
 	}()
 
 	f := sync.WaitGroup{}
-	f.Add(5)
+	f.Add(workers)
 
-	for x := 0; x < 5; x++ {
+	for x := 0; x < workers; x++ {
 		go func() {
 			for c := range work {
 				if ok := testConnection(c, duration); ok {
