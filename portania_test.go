@@ -2,7 +2,10 @@ package main
 
 import (
 	"testing"
+	"time"
 )
+
+//listenOnPort := 8989
 
 // TestPortaniaGetPorts tests the getPorts function in Portania.
 func TestPortaniaGetPorts(t *testing.T) {
@@ -53,4 +56,28 @@ func TestPortaniaGetPorts(t *testing.T) {
 			}
 		}
 	}
+}
+
+// TestPortaniaGetPorts tests the getPorts function in Portania.
+func TestPortaniaConnection(t *testing.T) {
+
+	testSuite := map[string]struct {
+		addr     string
+		duration time.Duration
+		err      string
+	}{
+		"testConnection should throw an due to a closed port on localhost": {
+			err: "failed ...",
+		},
+	}
+	for testName, testCase := range testSuite {
+		t.Logf("Running test %v\n%v", testName, testCase)
+	}
+}
+
+func ExampleconnectionBroker() {
+
+	// Output:
+	// Connected to localhost:8989
+
 }
