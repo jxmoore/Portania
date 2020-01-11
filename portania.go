@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"strconv"
 	"strings"
@@ -16,13 +17,13 @@ func main() {
 
 	host := flag.String("h", "", "The host that will be scanned.")
 	timeout := flag.Int64("t", 30, "The timeout duration in seconds.")
+	workers := flag.Int("w", 3, "The number of workers (threads) to use when scanning the remote host.")
 	portList := flag.String("p", "", "A comma seperated list containing the ports to scan.\n\tE.G. usage :  80,443,3389,1433.")
 	portRange := flag.String("pr", "", "A port range as 'port'-'port'.\n\tE.G. usage : 80-443 would scan all ports from 80 through 443")
-	workers := flag.Int("w", 3, "A port range as 'port'-'port'.\n\tE.G. usage : 80-443 would scan all ports from 80 through 443")
+	splay := flag.Bool("s", false, "Enable splay, this causes a random sleep between each port scanned.")
 
 	flag.Parse()
 
-	duration := time.Duration(*timeout) * time.Second
 	ports, err := getPorts(*portList, *portRange)
 	if err != nil {
 		log.Fatal(err.Error())
@@ -31,7 +32,12 @@ func main() {
 	if *workers == 0 {
 		*workers = 1
 	}
-	connectionBroker(duration, *workers, *host, ports)
+	if *timeout == 0 {
+		*timeout = 30
+	}
+
+	duration := time.Duration(*timeout) * time.Second
+	connectionBroker(duration, *workers, *host, ports, *splay)
 
 }
 
@@ -77,40 +83,60 @@ func getPorts(portList, portRange string) ([]int, error) {
 
 }
 
-func connectionBroker(duration time.Duration, workers int, host string, ports []int) {
+func connectionBroker(duration time.Duration, workers int, host string, ports []int, splay bool) {
 
 	work := make(chan string)
+	rand.NewSource(time.Now().UnixNano())
+
 	go func() {
+
 		for _, p := range ports {
 			work <- fmt.Sprintf("%v:%v", host, p)
+			if splay {
+				time.Sleep(time.Second * time.Duration(rand.Intn(17)))
+			}
 		}
+
 		close(work)
+
 	}()
 
-	f := sync.WaitGroup{}
-	f.Add(workers)
+	wg := sync.WaitGroup{}
+	wg.Add(workers)
 
 	for x := 0; x < workers; x++ {
+
 		go func() {
-			for c := range work {
-				if ok := testConnection(c, duration); ok {
-					fmt.Printf("Connected to %v\n", c)
+
+			for w := range work {
+				if ok := testConnection(w, duration); ok {
+					fmt.Printf("Connected to %v\n", w)
 				} else {
-					fmt.Printf("failed to connect to %v\n", c)
+					fmt.Printf("failed to connect to %v\n", w)
+				}
+				if splay {
+					time.Sleep(time.Second * time.Duration(rand.Intn(8)))
 				}
 			}
-			f.Done()
+
+			wg.Done()
+
 		}()
 	}
-	f.Wait()
+
+	wg.Wait()
+
 }
 
 func testConnection(host string, duration time.Duration) bool {
+
 	con, err := net.DialTimeout("tcp", host, duration)
 	if err != nil {
 		return false
 	}
-	fmt.Printf("Connction successful %v\n", host)
+
 	con.Close()
+
 	return true
+
 }
