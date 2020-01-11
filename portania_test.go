@@ -10,7 +10,7 @@ func TestPortaniaGetPorts(t *testing.T) {
 
 	testSuite := map[string]struct {
 		portRange string
-		portList  string
+		portList  []string
 		err       string
 		ports     []int
 	}{
@@ -18,7 +18,7 @@ func TestPortaniaGetPorts(t *testing.T) {
 			err: "no ports found to parse",
 		},
 		"getPorts using portList should return the ports 80,443,8080": {
-			portList: "80,443,8080",
+			portList: []string{"80", "443", "8080"},
 			ports:    []int{80, 443, 8080},
 		},
 		"getPorts using portRange should return the ports 80-85": {
@@ -60,7 +60,7 @@ func TestPortaniaGetPorts(t *testing.T) {
 // the connectionBrokers worker go routine
 func ExampleConnectionBrokerFail() {
 
-	connectionBroker(time.Second*5, 3, "localhost", []int{999}, false)
+	connectionBroker(time.Second*5, 3, []string{"localhost"}, []int{999}, false)
 	// Output: failed to connect to localhost:999 : dial tcp [::1]:999: connect: connection refused
 
 }
@@ -69,7 +69,7 @@ func ExampleConnectionBrokerFail() {
 // the connectionBrokers worker go routine
 func ExampleConnectionBrokerPass() {
 
-	connectionBroker(time.Second*5, 3, "google.com", []int{443}, false)
+	connectionBroker(time.Second*5, 3, []string{"google.com"}, []int{443}, false)
 	// Output: Connected to google.com:443
 }
 

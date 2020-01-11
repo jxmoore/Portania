@@ -15,16 +15,19 @@ import (
 
 func main() {
 
-	host := flag.String("h", "", "The host that will be scanned.")
+	host := flag.String("h", "", "A list of the hosts that will be scanned.\n\tE.G. usage 'google.com localhost github.com'."+
+		"\n\tThis list should be space delimited and qutoes are neccesarry if specifying more than one host.")
 	timeout := flag.Int64("t", 30, "The timeout duration in seconds.")
 	workers := flag.Int("w", 3, "The number of workers (threads) to use when scanning the remote host.")
-	portList := flag.String("p", "", "A comma seperated list containing the ports to scan.\n\tE.G. usage :  80,443,3389,1433.")
+	portList := flag.String("p", "", "A delimited seperated list containing the ports to scan.\n\tE.G. usage :  '80 443 3389 1433'.\n\t"+
+		"If specifying a list of ports rathen than a single port the quotes are required.")
 	portRange := flag.String("pr", "", "A port range as 'port'-'port'.\n\tE.G. usage : 80-443 would scan all ports from 80 through 443")
 	splay := flag.Bool("s", false, "Enable splay, this causes a random sleep between each port scanned.")
 
 	flag.Parse()
 
-	ports, err := getPorts(*portList, *portRange)
+	pList := strings.Fields(*portList)
+	ports, err := getPorts(pList, *portRange)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -36,18 +39,19 @@ func main() {
 		*timeout = 30
 	}
 
+	hostnames := strings.Fields(*host)
 	duration := time.Duration(*timeout) * time.Second
-	connectionBroker(duration, *workers, *host, ports, *splay)
+	connectionBroker(duration, *workers, hostnames, ports, *splay)
 
 }
 
 // getPorts takes two strings and uses either of those to construct a splice of ints that represents a port range.
-func getPorts(portList, portRange string) ([]int, error) {
+func getPorts(portList []string, portRange string) ([]int, error) {
 
 	var ports []int
 
-	if portList != "" {
-		for _, p := range strings.Split(portList, ",") {
+	if len(portList) != 0 {
+		for _, p := range portList {
 
 			port, err := strconv.Atoi(p)
 			if err != nil {
@@ -91,17 +95,18 @@ func getPorts(portList, portRange string) ([]int, error) {
 
 // connectionBroker creates a channel and pumps in all of the addresses that need to be tested - 'host+:+p'
 // 'x' worker go routines are created that pull from this channel, calling testConnection and printing the result.
-func connectionBroker(duration time.Duration, workers int, host string, ports []int, splay bool) {
+func connectionBroker(duration time.Duration, workers int, hostnames []string, ports []int, splay bool) {
 
 	work := make(chan string)
 	rand.NewSource(time.Now().UnixNano())
 
 	go func() {
-
-		for _, p := range ports {
-			work <- fmt.Sprintf("%v:%v", host, p)
-			if splay {
-				time.Sleep(time.Second * time.Duration(rand.Intn(17)))
+		for _, h := range hostnames {
+			for _, p := range ports {
+				work <- fmt.Sprintf("%v:%v", h, p)
+				if splay {
+					time.Sleep(time.Second * time.Duration(rand.Intn(17)))
+				}
 			}
 		}
 
