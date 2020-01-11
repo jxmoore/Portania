@@ -41,29 +41,32 @@ func main() {
 
 }
 
+// getPorts takes two strings and uses either of those to construct a splice of ints that represents a port range.
 func getPorts(portList, portRange string) ([]int, error) {
 
 	var ports []int
 
 	if portList != "" {
 		for _, p := range strings.Split(portList, ",") {
+
 			port, err := strconv.Atoi(p)
 			if err != nil {
 				fmt.Println("unable to parse port ", p)
 				continue
 			}
+
 			ports = append(ports, port)
 		}
-
-		return ports, nil
 	}
 
 	if portRange != "" {
+
 		pr := strings.Split(portRange, "-")
 		lower, err := strconv.Atoi(pr[0])
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse port %v", pr[0])
 		}
+
 		upper, err := strconv.Atoi(pr[1])
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse port %v", pr[1])
@@ -76,6 +79,9 @@ func getPorts(portList, portRange string) ([]int, error) {
 		for i := lower; i < upper+1; i++ {
 			ports = append(ports, i)
 		}
+	}
+
+	if len(ports) != 0 {
 		return ports, nil
 	}
 
@@ -83,6 +89,9 @@ func getPorts(portList, portRange string) ([]int, error) {
 
 }
 
+
+// connectionBroker creates a channel and pumps in all of the addresses that need to be tested - 'host+:+p'
+// 'worker' go routines are created that pull from this channel, calling testConnection and printing the result.
 func connectionBroker(duration time.Duration, workers int, host string, ports []int, splay bool) {
 
 	work := make(chan string)
@@ -109,10 +118,10 @@ func connectionBroker(duration time.Duration, workers int, host string, ports []
 		go func() {
 
 			for w := range work {
-				if ok := testConnection(w, duration); ok {
+				if ok, err := testConnection(w, duration); ok {
 					fmt.Printf("Connected to %v\n", w)
 				} else {
-					fmt.Printf("failed to connect to %v\n", w)
+					fmt.Printf("failed to connect to %v : %v\n", w, err)
 				}
 				if splay {
 					time.Sleep(time.Second * time.Duration(rand.Intn(8)))
@@ -128,15 +137,17 @@ func connectionBroker(duration time.Duration, workers int, host string, ports []
 
 }
 
-func testConnection(host string, duration time.Duration) bool {
+// testConnection tests the connection provided in address over TCP, if successful it returns true along with a nil error,
+// in the event that the timeout is reached, the connection fails or there is an error it returns false along with the error value.
+func testConnection(address string, duration time.Duration) (bool, error) {
 
-	con, err := net.DialTimeout("tcp", host, duration)
+	con, err := net.DialTimeout("tcp", address, duration)
 	if err != nil {
-		return false
+		return false, err
 	}
 
 	con.Close()
 
-	return true
+	return true, nil
 
 }
