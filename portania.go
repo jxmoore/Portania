@@ -89,7 +89,6 @@ func getPorts(portList, portRange string) ([]int, error) {
 
 }
 
-
 // connectionBroker creates a channel and pumps in all of the addresses that need to be tested - 'host+:+p'
 // 'worker' go routines are created that pull from this channel, calling testConnection and printing the result.
 func connectionBroker(duration time.Duration, workers int, host string, ports []int, splay bool) {
