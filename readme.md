@@ -1,7 +1,7 @@
 # Portania
 
 <img src="img/portania.png" align="right" title="portania" width="175" height="175">
-Portania is a small concurrent port scanner written in Go that allows you to scan one or more ports on one or more hosts using a user defined number of GO routines.
+Portania is a small concurrent port scanner written in Go that allows you to scan one or more ports on one or more hosts using a user defined number of GO routines.<br>
 
 <br>
 <br>
@@ -32,7 +32,6 @@ Scanning a remote or local host is simple and quick :
 <br>
 
 Lets break down the above command:
-
 * `-ports '80 443 8080'` - This is a space delimited list of the port(s) we want to scan, in this case its just *80, 443 and 8080* but it can be any number of ports or just a single port.
 
 * `-timeout 5` - This is the timeout period for a connection attempt. If the timeout is reached before the host responds on the given port the connection is deemed a failure and the port marked *'closed'*.
@@ -41,10 +40,9 @@ Lets break down the above command:
 
 * `-hosts 'github.com google.com reddit.com yahoo.com'` - These are the remote hosts we want to scan. When specifying multiples like this you must quote it but your not limited to websites like in this example, these can be datacenter machine FQDNS, localhost etc... *But the connection will be made over **TCP**.*
 
-There are of course other options, lets say we want to specify a range of ports rather than typing them all out, you can do this with the `-portrange` flag :
-<br><p align="center"><img src="img/portranges.png" title="portranges"></p><br>
-
+<br><br>There are of course other options, lets say we want to specify a range of ports rather than typing them all out, you can do this with the `-portrange` flag :
+<br><p align="center"><img src="img/portranges.png" title="portranges"></p>
 Or perhaps your not intrested in what fails, you only want to see the successful connections, this can be done with the `-hideclosed` flag :
-<br><p align="center"><img src="img/hideclosed.png" title="hideclosed"></p><br>
+<br><p align="center"><img src="img/hideclosed.png" title="hideclosed"></p>
 
 To see all the available options and default values for things like the timeout you can use the `-help` flag. 
