@@ -36,7 +36,7 @@ Lets break down the above command:
 
 * `-timeout 5` - This is the timeout period for a connection attempt. If the timeout is reached before the host responds on the given port the connection is deemed a failure and the port marked *'closed'*.
 
-* `-workers 5` - This determines the number of routines to create when scanning. If your unfamiliar with GO you can think of GO routines similarly to threads in a language such as C# (although they are quite different). Portania pushes *'work'* items to a channel, these work items are the TCP address to be scanned, for example 'Google.com:443'. The workers are the routines that are created that pull work items (address to scan) from that channel, think of it like a pub/sub where the routines are the subscribers.
+* `-workers 5` - This determines the number of routines to create when scanning. If your unfamiliar with GO you can think of GO routines similarly to threads in a language such as C# (although they are quite different). Portania pushes *'work'* items to a channel, these work items are the TCP address to be scanned, for example *'google.com:443'*. The workers are the routines that are created that pull work items (address to scan) from that channel, think of it like a pub/sub where the routines are the subscribers, the more subscribers you have the quicker they can process the work being published.
 
 * `-hosts 'github.com google.com reddit.com yahoo.com'` - These are the remote hosts we want to scan. When specifying multiples like this you must quote it but your not limited to websites like in this example, these can be datacenter machine FQDNS, localhost etc... *But the connection will be made over **TCP**.*
 
