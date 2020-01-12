@@ -56,21 +56,15 @@ func TestPortaniaGetPorts(t *testing.T) {
 	}
 }
 
-// ExampleConnectionBrokerFail tests the output printed when a connection fails during
-// the connectionBrokers worker go routine
-func ExampleConnectionBrokerFail() {
-
-	connectionBroker(time.Second*5, 3, []string{"localhost"}, []int{999}, false)
-	// Output: failed to connect to localhost:999 : dial tcp [::1]:999: connect: connection refused
-
-}
-
 // ExampleConnectionBrokerPass tests the output printed when a connection is successful during
 // the connectionBrokers worker go routine
-func ExampleConnectionBrokerPass() {
+func ExampleConnectionBroker() {
 
-	connectionBroker(time.Second*5, 3, []string{"google.com"}, []int{443}, false)
-	// Output: Connected to google.com:443
+	connectionBroker(time.Second*5, 3, []string{"google.com", "github.com", "jomoLocal.fail"}, []int{443}, false, false, false, false)
+	// Output:
+	//Port 443 is open on host google.com
+	//Port 443 is open on host github.com
+	//Port 443 is closed on jomoLocal.fail
 }
 
 // TestPortaniaConnection tests the testConnection function in Portania.
