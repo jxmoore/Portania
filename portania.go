@@ -30,7 +30,7 @@ func main() {
 		"If specifying a list of ports rathen than a single port the quotes are required.")
 	portRange := flag.String("portrange", "", "A port range as 'port'-'port'.\n\tE.G. usage : 80-443 would scan all ports from 80 through 443")
 	splay := flag.Bool("splay", false, "Enable splay, this causes a random sleep between each port scanned.")
-	hideFailures := flag.Bool("hidefailures", false, "Enabling this hides the output regarding closed ports and or connection failures.")
+	hideClosed := flag.Bool("hideclosed", false, "Enabling this hides the output regarding closed ports and or connection failures.")
 	debug := flag.Bool("debug", false, "Enables debug output, this will include the connection failure information.")
 
 	flag.Parse()
@@ -56,7 +56,7 @@ func main() {
 		useColor = true
 	}
 
-	connectionBroker(duration, *workers, hostnames, ports, *splay, *hideFailures, *debug, useColor)
+	connectionBroker(duration, *workers, hostnames, ports, *splay, *hideClosed, *debug, useColor)
 
 }
 
@@ -182,12 +182,10 @@ func testConnection(address string, duration time.Duration) (bool, error) {
 func colorPrinter(success, useColor bool, message string) {
 
 	if useColor {
-		errorColor := "\033[1;31m%s\033[0m"
-		successColor := "\033[0;36m%s\033[0m"
 		if success {
-			fmt.Printf(successColor, message)
+			fmt.Printf("\033[0;36m%s\033[0m", message)
 		} else {
-			fmt.Printf(errorColor, message)
+			fmt.Printf("\033[1;31m%s\033[0m", message)
 		}
 	} else {
 		fmt.Printf(message)
