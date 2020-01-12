@@ -22,16 +22,17 @@ type address struct {
 
 func main() {
 
-	host := flag.String("hosts", "", "A list of the hosts that will be scanned.\n\tE.G. usage 'google.com localhost github.com'."+
-		"\n\tThis list should be space delimited and qutoes are neccesarry if specifying more than one host.")
-	timeout := flag.Int64("timeout", 10, "The timeout duration in seconds.")
-	workers := flag.Int("workers", 3, "The number of workers (threads) to use when scanning the remote host.")
-	portList := flag.String("ports", "", "A delimited seperated list containing the ports to scan.\n\tE.G. usage :  '80 443 3389 1433'.\n\t"+
-		"If specifying a list of ports rathen than a single port the quotes are required.")
-	portRange := flag.String("portrange", "", "A port range as 'port'-'port'.\n\tE.G. usage : 80-443 would scan all ports from 80 through 443")
-	splay := flag.Bool("splay", false, "Enable splay, this causes a random sleep between each port scanned.")
-	hideClosed := flag.Bool("hideclosed", false, "Enabling this hides the output regarding closed ports and or connection failures.")
-	debug := flag.Bool("debug", false, "Enables debug output, this will include the connection failure information.")
+	host := flag.String("hosts", "", "A list of the hosts that will be scanned. This list should be space delimited and qutoes are neccesarry if"+
+		" specifying more than one host.\n\tE.G. usage:\n\t\t\t -hosts 'google.com localhost github.com'\n")
+	timeout := flag.Int64("timeout", 0, "The timeout duration for a connection attempt in seconds.\n\tDefault: 10 seconds\n")
+	workers := flag.Int("workers", 0, "The number of workers (threads) to use when scanning the remote host.\n\tDefault: 1")
+	portList := flag.String("ports", "", "A space delimited seperated list containing the ports to scan. If specifying a list of ports rathen than a single port the quotes are required."+
+		"\n\tE.G. usage:\n\t\t\t  -ports '80 443 3389 1433'.\n")
+	portRange := flag.String("portrange", "", "A port range as 'port#-port#', the quotes are required.\n\tE.G. usage:\n\t\t\t -portrange '80-443'.\n")
+	splay := flag.Bool("splay", false, "Enables 'splay', this causes a random sleep whenever a work item is placed on the queue and after its processed.\n'Work' in this context refers to"+
+		" a port and host that will be scanned, and the queue refers to the channel its placed upon.\n")
+	hideClosed := flag.Bool("hideclosed", false, "Enabling this hides the output regarding closed ports and or connection failures, meaning only open ports will be displayed.\n")
+	debug := flag.Bool("debug", false, "Enables debug output, this will include the connection failure information.\n")
 
 	flag.Parse()
 
@@ -45,7 +46,7 @@ func main() {
 		*workers = 1
 	}
 	if *timeout == 0 {
-		*timeout = 30
+		*timeout = 10
 	}
 
 	var useColor bool

@@ -5,6 +5,9 @@ Portania is a small concurrent port scanner written in Go.
 <br>
 <br>
 
+## Installation
+
+
 ## Usage
 
 
