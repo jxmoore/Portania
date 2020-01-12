@@ -56,7 +56,7 @@ func TestPortaniaGetPorts(t *testing.T) {
 	}
 }
 
-// ExampleConnectionBrokerPass tests the output printed when a connection is successful during
+// ExampleConnectionBrokerPass tests the output printed when a connection is attempted during
 // the connectionBrokers worker go routine
 func ExampleConnectionBroker() {
 
