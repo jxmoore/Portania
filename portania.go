@@ -24,8 +24,8 @@ func main() {
 
 	host := flag.String("hosts", "", "A list of the hosts that will be scanned. This list should be space delimited and qutoes are neccesarry if"+
 		" specifying more than one host.\n\tE.G. usage:\n\t\t\t -hosts 'google.com localhost github.com'\n")
-	timeout := flag.Int64("timeout", 0, "The timeout duration for a connection attempt in seconds.\n\tDefault: 10 seconds\n")
-	workers := flag.Int("workers", 0, "The number of workers (threads) to use when scanning the remote host.\n\tDefault: 1")
+	timeout := flag.Int64("timeout", 10, "The timeout duration for a connection attempt in seconds.\n\tDefault: 10 seconds\n")
+	workers := flag.Int("workers", 1, "The number of workers (threads) to use when scanning the remote host.\n\tDefault: 1")
 	portList := flag.String("ports", "", "A space delimited seperated list containing the ports to scan. If specifying a list of ports rathen than a single port the quotes are required."+
 		"\n\tE.G. usage:\n\t\t\t  -ports '80 443 3389 1433'.\n")
 	portRange := flag.String("portrange", "", "A port range as 'port#-port#', the quotes are required.\n\tE.G. usage:\n\t\t\t -portrange '80-443'.\n")
@@ -33,6 +33,7 @@ func main() {
 		" a port and host that will be scanned, and the queue refers to the channel its placed upon.\n")
 	hideClosed := flag.Bool("hideclosed", false, "Enabling this hides the output regarding closed ports and or connection failures, meaning only open ports will be displayed.\n")
 	debug := flag.Bool("debug", false, "Enables debug output, this will include the connection failure information.\n")
+	useColor := flag.Bool("color", false, "Enables color output, this will indicate connection failures or successes.\n")
 
 	flag.Parse()
 
@@ -49,15 +50,14 @@ func main() {
 		*timeout = 10
 	}
 
-	var useColor bool
 	hostnames := strings.Fields(*host)
 	duration := time.Duration(*timeout) * time.Second
 
-	if runtime.GOOS != "windows" {
-		useColor = true
+	if runtime.GOOS == "windows" {
+		*useColor = false
 	}
 
-	connectionBroker(duration, *workers, hostnames, ports, *splay, *hideClosed, *debug, useColor)
+	connectionBroker(duration, *workers, hostnames, ports, *splay, *hideClosed, *debug, *useColor)
 
 }
 
